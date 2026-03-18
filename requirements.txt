@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+cryptography
+argon2-cffi
+pydantic>=2.0
