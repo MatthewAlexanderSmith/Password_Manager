@@ -1,5 +1,5 @@
 import os
-import json
+from json import dump, load
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from argon2.low_level import hash_secret_raw, Type
 
@@ -94,12 +94,12 @@ class CryptoService:
     @staticmethod
     def save_to_file(data: dict, filename: str):
         with open(filename, "w") as f:
-            json.dump(data, f, indent=4)
+            dump(data, f, indent=4)
 
     @staticmethod
     def load_from_file(filename: str) -> dict:
         with open(filename, "r") as f:
-            return json.load(f)
+            return load(f)
 
 
 # TEST
