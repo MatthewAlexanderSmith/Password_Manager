@@ -3,9 +3,7 @@ import json
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from argon2.low_level import hash_secret_raw, Type
 
-# -------------------------
 # CONFIG
-# -------------------------
 ARGON2_TIME_COST = 3
 ARGON2_MEMORY_COST = 64 * 1024
 ARGON2_PARALLELISM = 2
@@ -13,14 +11,12 @@ KEY_LENGTH = 32
 NONCE_SIZE = 12
 SALT_SIZE = 16
 
-AAD = b"cognivault-v1"  # authenticated context
+AAD = b"cognivault-v1"
 
 
 class CryptoService:
 
-    # -------------------------
     # KEY DERIVATION
-    # -------------------------
     @staticmethod
     def derive_key(master_password: str, salt: bytes) -> bytearray:
         key = hash_secret_raw(
@@ -34,17 +30,13 @@ class CryptoService:
         )
         return bytearray(key)  # mutable for wiping
 
-    # -------------------------
     # SECURE MEMORY WIPE
-    # -------------------------
     @staticmethod
     def secure_erase(data: bytearray):
         for i in range(len(data)):
             data[i] = 0
 
-    # -------------------------
     # ENCRYPT ENTRY
-    # -------------------------
     @staticmethod
     def encrypt_entry(password: str, master_password: str) -> dict:
         salt = os.urandom(SALT_SIZE)
@@ -65,9 +57,7 @@ class CryptoService:
         finally:
             CryptoService.secure_erase(key)
 
-    # -------------------------
     # DECRYPT ENTRY
-    # -------------------------
     @staticmethod
     def decrypt_entry(data: dict, master_password: str) -> str:
         salt = bytes.fromhex(data["salt"])
@@ -87,9 +77,7 @@ class CryptoService:
         finally:
             CryptoService.secure_erase(key)
 
-    # -------------------------
     # MASTER PASSWORD VERIFICATION
-    # -------------------------
     @staticmethod
     def create_verification(master_password: str) -> dict:
         return CryptoService.encrypt_entry("vault_check", master_password)
@@ -102,9 +90,7 @@ class CryptoService:
         except Exception:
             return False
 
-    # -------------------------
     # FILE OPERATIONS
-    # -------------------------
     @staticmethod
     def save_to_file(data: dict, filename: str):
         with open(filename, "w") as f:
@@ -116,9 +102,7 @@ class CryptoService:
             return json.load(f)
 
 
-# -------------------------
-# TEST (SPRINT 2 FINAL DEMO)
-# -------------------------
+# TEST
 if __name__ == "__main__":
     master_password = "StrongMasterPassword!"
     vault_file = "vault_entry.json"
