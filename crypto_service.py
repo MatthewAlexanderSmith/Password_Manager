@@ -39,6 +39,7 @@ class CryptoService:
     # ENCRYPT ENTRY
     @staticmethod
     def encrypt_entry(password: str, master_password: str) -> dict:
+        data_bytes = password.encode() if isinstance(password, str) else password
         salt = urandom(SALT_SIZE)
         key = CryptoService.derive_key(master_password, salt)
 
@@ -46,7 +47,7 @@ class CryptoService:
             aesgcm = AESGCM(bytes(key))
             nonce = urandom(NONCE_SIZE)
 
-            ciphertext = aesgcm.encrypt(nonce, password.encode(), AAD)
+            ciphertext = aesgcm.encrypt(nonce, data_bytes, AAD)
 
             return {
                 "salt": salt.hex(),
@@ -69,7 +70,10 @@ class CryptoService:
         try:
             aesgcm = AESGCM(bytes(key))
             plaintext = aesgcm.decrypt(nonce, ciphertext, AAD)
-            return plaintext.decode()
+            try:
+                return plaintext.decode("utf-8")
+            except UnicodeDecodeError:
+                return plaintext  # Return raw bytes if it's a file (like a ZIP)
 
         except Exception:
             raise ValueError("Decryption failed — wrong password or tampered data")
