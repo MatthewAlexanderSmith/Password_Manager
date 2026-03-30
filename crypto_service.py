@@ -1,4 +1,4 @@
-import os
+from os import urandom
 from json import dump, load
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from argon2.low_level import hash_secret_raw, Type
@@ -39,12 +39,12 @@ class CryptoService:
     # ENCRYPT ENTRY
     @staticmethod
     def encrypt_entry(password: str, master_password: str) -> dict:
-        salt = os.urandom(SALT_SIZE)
+        salt = urandom(SALT_SIZE)
         key = CryptoService.derive_key(master_password, salt)
 
         try:
             aesgcm = AESGCM(bytes(key))
-            nonce = os.urandom(NONCE_SIZE)
+            nonce = urandom(NONCE_SIZE)
 
             ciphertext = aesgcm.encrypt(nonce, password.encode(), AAD)
 
@@ -100,36 +100,3 @@ class CryptoService:
     def load_from_file(filename: str) -> dict:
         with open(filename, "r") as f:
             return load(f)
-
-
-# TEST
-if __name__ == "__main__":
-    master_password = "StrongMasterPassword!"
-    vault_file = "vault_entry.json"
-    verify_file = "verification.json"
-
-    print("=== Creating verification ===")
-    verification = CryptoService.create_verification(master_password)
-    CryptoService.save_to_file(verification, verify_file)
-
-    print("=== Verifying master password ===")
-    loaded_ver = CryptoService.load_from_file(verify_file)
-    print(
-        "Correct password:",
-        CryptoService.verify_master_password(loaded_ver, master_password),
-    )
-    print(
-        "Wrong password:", CryptoService.verify_master_password(loaded_ver, "wrongpass")
-    )
-
-    print("\n=== Encrypting entry ===")
-    encrypted_entry = CryptoService.encrypt_entry(
-        "gmail_password_123!", master_password
-    )
-    CryptoService.save_to_file(encrypted_entry, vault_file)
-
-    print("=== Decrypting entry ===")
-    loaded = CryptoService.load_from_file(vault_file)
-    decrypted = CryptoService.decrypt_entry(loaded, master_password)
-
-    print("Recovered:", decrypted)
