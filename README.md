@@ -19,27 +19,84 @@ uvicorn main:app --reload
 
 ## API Overview
 
-| Method | Endpoint               | Description                                      | Status                 |
-| :----- | :--------------------- | :----------------------------------------------- | :--------------------- |
-| POST   | `/vault/unlock`        | Derive key from master password, store in memory | Implemented (stub KDF) |
-| POST   | `/vault/lock`          | Wipe in-memory key                               | Pending                |
-| GET    | `/vault/status`        | Return lock state                                | Pending                |
-| GET    | `/entries`             | List all entries (metadata only)                 | Pending                |
-| POST   | `/entries`             | Create entry with encrypted password             | Pending                |
-| GET    | `/entries/{id}`        | Retrieve entry with decrypted password           | Pending                |
-| PUT    | `/entries/{id}`        | Update entry                                     | Pending                |
-| DELETE | `/entries/{id}`        | Delete entry                                     | Pending                |
-| POST   | `/ai/score-password`   | Stub — to be implemented by Paul                 | Stub only              |
-| POST   | `/breach/check`        | Stub — to be implemented by Paul                 | Stub only              |
-| POST   | `/export/quantum-safe` | Stub — to be implemented by Omar                 | Stub only              |
+| Method | Endpoint             | Description                                      | Status         |
+| ------ | -------------------- | ------------------------------------------------ | -------------- |
+| POST   | /vault/unlock        | Derive key from master password, store in memory | ✅ Implemented |
+| POST   | /vault/lock          | Wipe in-memory key                               | ✅ Implemented |
+| GET    | /vault/status        | Return lock state                                | ✅ Implemented |
+| GET    | /entries             | List all entries (metadata only)                 | ⏳ Pending     |
+| POST   | /entries             | Create entry with encrypted password             | ✅ Implemented |
+| GET    | /entries/{id}        | Retrieve entry with decrypted password           | ✅ Implemented |
+| PUT    | /entries/{id}        | Update entry                                     | ⏳ Pending     |
+| DELETE | /entries/{id}        | Delete entry                                     | ⏳ Pending     |
+| POST   | /ai/score-password   | Stub — to be implemented by Paul                 | 🔲 Stub only   |
+| POST   | /breach/check        | Stub — to be implemented by Paul                 | 🔲 Stub only   |
+| POST   | /export/quantum-safe | Stub — to be implemented by Omar                 | 🔲 Stub only   |
 
-## Security Notes
+## Architecture
 
-- Master password is never stored; only the derived key is held in memory
-- All passwords are encrypted with AES-256-GCM before any disk write
-- CORS is locked to localhost only
-- KDF: Argon2id (memory=64MB, iterations=3) — stub currently active
+```
+cognivault-backend/
+├── main.py                  # FastAPI app, CORS, DB init on startup
+├── session.py               # Thread-safe in-memory key store
+├── requirements.txt
+├── db/
+│   ├── database.py          # SQLite connection, WAL mode, context manager
+│   └── schema.sql           # vault_entries + vault_meta tables
+├── crypto/
+│   ├── aes_gcm.py           # AES-256-GCM encrypt/decrypt
+│   └── kdf.py               # Argon2id key derivation (64MB, 3 iter)
+├── routers/
+│   ├── vault.py             # /vault/unlock, /lock, /status
+│   ├── entries.py           # /entries CRUD (partial)
+│   ├── ai_stub.py           # /ai/score-password stub
+│   ├── breach_stub.py       # /breach/check stub
+│   └── export_stub.py       # /export/quantum-safe stub
+└── tests/
+    ├── test_crypto.py
+    └── test_entries.py
+```
 
-## Branch
+## Security Design
 
-`feature/backend-api`
+- **Master password** is never stored — only the Argon2id-derived key is held in memory
+- **Salt** is generated on first unlock, persisted in `vault_meta` as hex
+- **Verifier blob** (AES-GCM encrypted) stored in `vault_meta` to validate master password on subsequent unlocks without storing the password itself
+- **All passwords** are encrypted with AES-256-GCM before any disk write; ciphertext, nonce, and tag stored as separate BLOBs in SQLite
+- **CORS** locked to localhost only
+- **Session** is thread-safe (RLock); all protected routes return HTTP 401 when vault is locked
+- **KDF:** Argon2id — memory=64MB, iterations=3, parallelism=4, output=32 bytes
+
+## Quick Test (Manual)
+
+```bash
+# 1. Start server
+uvicorn main:app --reload
+
+# 2. First unlock (initialises vault + salt)
+curl -X POST http://127.0.0.1:8000/vault/unlock -H "Content-Type: application/json" -d "{\"password\": \"master123\"}"
+# → {"status":"unlocked","first_run":true}
+
+# 3. Create an entry
+curl -X POST http://127.0.0.1:8000/entries -H "Content-Type: application/json" -d "{\"title\":\"Gmail\",\"username\":\"me\",\"password\":\"secret123\"}"
+# → {"id":1}
+
+# 4. Retrieve and decrypt
+curl http://127.0.0.1:8000/entries/1
+# → {"id":1,"title":"Gmail","username":"me","url":null,"password":"secret123","tags":""}
+
+# 5. Lock vault
+curl -X POST http://127.0.0.1:8000/vault/lock
+
+# 6. Confirm access is blocked
+curl http://127.0.0.1:8000/entries/1
+# → {"detail":"Vault is locked"}
+```
+
+## Running Tests
+
+```bash
+python -m pytest
+```
+
+Crypto tests cover: encrypt/decrypt roundtrip, wrong-key rejection, nonce uniqueness.

@@ -10,7 +10,7 @@ __pycache__/
 .env
 *.env
 
-# Database files (never commit a real vault)
+# Database files
 *.db
 *.sqlite
 *.sqlite3
