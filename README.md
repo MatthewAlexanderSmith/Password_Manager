@@ -17,21 +17,27 @@ This module provides two core components for CogniVault:
 
 ## Structure
 
+```
 ai/
-├── features.py # Feature extraction from raw passwords
-├── train.py # Random Forest training script
-├── scorer.py # score_password() → 0.0 to 1.0
+├── features.py        # Feature extraction from raw passwords
+├── train.py           # Random Forest training script
+├── scorer.py          # score_password() → 0.0 to 1.0
 └── convert_to_sha1.py # Converts plaintext corpus to SHA-1
+
 bloom/
-└── breach_checker.py # is_breached() via Bloom Filter
+└── breach_checker.py  # is_breached() via Bloom Filter
+
 tests/
-├── test_scorer.py # 7 unit tests for scorer
-└── test_breach.py # 6 unit tests for breach checker
+├── test_scorer.py     # 7 unit tests for scorer
+└── test_breach.py     # 6 unit tests for breach checker
+
 models/
-└── rf_model.pkl # Trained model (not committed to git)
-data/ # Datasets (not committed to git)
-├── rockyou.txt # Download from Kaggle
-└── hibp_sample.txt # Generated via convert_to_sha1.py
+└── rf_model.pkl       # Trained model (not committed to git)
+
+data/
+├── rockyou.txt        # Download from Kaggle
+└── hibp_sample.txt    # Generated via convert_to_sha1.py
+```
 
 ---
 
