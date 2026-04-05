@@ -1,19 +1,20 @@
-# CogniVault – AI & Algorithms Module
+# CogniVault — AI & Algorithms
 
-**Developer:** Paul  
-**Branch:** `feature/ai-algorithms`  
-**Module:** MI204 – Proiect software în echipă
+Offline AI and breach-detection module for the CogniVault local-only password manager.
 
----
+## Responsibilities
 
-## Overview
+- Random Forest model for password strength scoring
+- Bloom Filter breach checker against SHA-1 corpus
+- Unit tests for both components
 
-This module provides two core components for CogniVault:
+## Setup
 
-1. **Password Strength Scorer** – offline Random Forest model
-2. **Breach Checker** – Bloom Filter against SHA-1 breach corpus
-
----
+```
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+```
 
 ## Structure
 
@@ -39,35 +40,28 @@ data/
 └── hibp_sample.txt    # Generated via convert_to_sha1.py
 ```
 
----
+## API
 
-## Setup
+| Function                    | Location                  | Description                            | Status         |
+| --------------------------- | ------------------------- | -------------------------------------- | -------------- |
+| `score_password(password)`  | `ai/scorer.py`            | Returns 0.2 / 0.6 / 1.0 strength score | ✅ Implemented |
+| `is_breached(password, bf)` | `bloom/breach_checker.py` | Returns True/False from Bloom Filter   | ✅ Implemented |
+| `build_bloom_filter(path)`  | `bloom/breach_checker.py` | Loads SHA-1 corpus into Bloom Filter   | ✅ Implemented |
 
-```bash
-pip install scikit-learn pandas numpy joblib pytest bloom-filter2
+## Datasets
+
+- **rockyou.txt** — download from [Kaggle](https://www.kaggle.com/datasets/wjburns/common-password-list-rockyoutxt), place in `data/`
+- **hibp_sample.txt** — generated locally by running `python ai/convert_to_sha1.py`
+
+## Running Tests
+
 ```
-
----
-
-## Usage
-
-```python
-from ai.scorer import score_password
-from bloom.breach_checker import build_bloom_filter, is_breached
-
-# Score a password (0.2=weak, 0.6=medium, 1.0=strong)
-score = score_password("Tr0ub4dor&3")  # → 1.0
-
-# Check against breach corpus
-bf = build_bloom_filter("data/hibp_sample.txt")
-breached = is_breached("123456", bf)   # → True
-```
-
----
-
-## Tests
-
-```bash
 pytest tests/ -v
 # 13/13 tests passing
 ```
+
+## Security Design
+
+- Raw passwords are never stored — only SHA-1 hashes are loaded into the Bloom Filter
+- Random Forest inference runs fully offline — no API calls, no data leakage
+- Bloom Filter tuned to 1% false positive rate at 1M entries (~12MB memory)
