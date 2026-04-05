@@ -10,9 +10,9 @@ MODEL_PATH = os.path.join("..", "models", "rf_model.pkl")
 model = joblib.load(MODEL_PATH)
 
 LABEL_SCORES = {
-    "weak":   0.2,
-    "medium": 0.6,
-    "strong": 1.0,
+    "weak":   20,
+    "medium": 60,
+    "strong": 100,
 }
 
 def score_password(password: str) -> float:
