@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from datetime import datetime, timezone
+from time import time
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -17,6 +18,10 @@ SALT_KEY = "kdf_salt"
 VERIFIER_KEY = "master_verifier"
 VERIFIER_TEXT = b"cognivault-verifier"
 
+FAILED_ATTEMPTS = {}
+LOCKOUT_SECONDS = 10
+MAX_ATTEMPTS = 5
+
 
 class UnlockRequest(BaseModel):
     password: str
@@ -24,6 +29,16 @@ class UnlockRequest(BaseModel):
 
 @router.post("/unlock")
 def unlock(req: UnlockRequest):
+    client_id = "local"  # single-user app
+
+    now = time()
+
+    if client_id in FAILED_ATTEMPTS:
+        attempts, last_time = FAILED_ATTEMPTS[client_id]
+
+        if attempts >= MAX_ATTEMPTS and now - last_time < LOCKOUT_SECONDS:
+            raise HTTPException(status_code=429, detail="Too many attempts. Try later")
+        
     with get_connection() as conn:
         salt_row = conn.execute(
             "SELECT value FROM vault_meta WHERE key = ?",
@@ -75,6 +90,9 @@ def unlock(req: UnlockRequest):
             if plaintext != VERIFIER_TEXT:
                 raise HTTPException(status_code=401, detail="Invalid master password")
         except Exception:
+            attempts, _ = FAILED_ATTEMPTS.get(client_id, (0, now))
+            FAILED_ATTEMPTS[client_id] = (attempts + 1, now)
+
             raise HTTPException(status_code=401, detail="Invalid master password")
 
         conn.execute(

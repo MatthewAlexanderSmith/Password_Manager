@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from fastapi import APIRouter
-from pydantic import BaseModel
-
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
 from crypto.aes_gcm import encrypt, decrypt
 from db.database import get_connection
 import session
@@ -11,18 +10,18 @@ router = APIRouter(prefix="/entries", tags=["entries"])
 
 
 class EntryCreate(BaseModel):
-    title: str
-    username: str | None = None
-    url: str | None = None
-    password: str
-    tags: str | None = ""
+    title: str = Field(min_length=1, max_length=100)
+    username: str | None = Field(default=None, max_length=100)
+    url: str | None = Field(default=None, max_length=255)
+    password: str = Field(min_length=1, max_length=512)
+    tags: str | None = Field(default="", max_length=255)
 
 class EntryUpdate(BaseModel):
-    title: str | None = None
-    username: str | None = None
-    url: str | None = None
-    password: str | None = None
-    tags: str | None = None
+    title: str | None = Field(default=None, min_length=1, max_length=100)
+    username: str | None = Field(default=None, max_length=100)
+    url: str | None = Field(default=None, max_length=255)
+    password: str | None = Field(default=None, min_length=1, max_length=512)
+    tags: str | None = Field(default=None, max_length=255)
 
 
 @router.post("")
@@ -64,7 +63,7 @@ def get_entry(entry_id: int):
         ).fetchone()
 
         if row is None:
-            return {"error": "Not found"}
+            raise HTTPException(status_code=404, detail="Entry not found")
 
         password = decrypt(
             row["encrypted_password"],
@@ -119,7 +118,7 @@ def delete_entry(entry_id: int):
         )
 
         if cursor.rowcount == 0:
-            return {"error": "Not found"}
+            raise HTTPException(status_code=404, detail="Entry not found")
 
     return {"status": "deleted"}
 
@@ -134,7 +133,7 @@ def update_entry(entry_id: int, req: EntryUpdate):
         ).fetchone()
 
         if row is None:
-            return {"error": "Not found"}
+            raise HTTPException(status_code=404, detail="Entry not found")
 
         # Prepare updated values
         title = req.title if req.title is not None else row["title"]

@@ -66,6 +66,8 @@ cognivault-backend/
 - **CORS** locked to localhost only
 - **Session** is thread-safe (RLock); all protected routes return HTTP 401 when vault is locked
 - **KDF:** Argon2id — memory=64MB, iterations=3, parallelism=4, output=32 bytes
+- **Brute-force protection:** in-memory lockout after 5 failed unlock attempts (10 second cooldown); returns HTTP 429
+- **Input validation:** all entry fields have enforced length limits (title 1–100 chars, password 1–512 chars, etc.) — empty or oversized input returns HTTP 422
 
 ## Quick Test (Manual)
 
@@ -99,4 +101,9 @@ curl http://127.0.0.1:8000/entries/1
 python -m pytest
 ```
 
-Crypto tests cover: encrypt/decrypt roundtrip, wrong-key rejection, nonce uniqueness.
+8 tests total across two files:
+
+- `tests/test_crypto.py` — AES-GCM encrypt/decrypt roundtrip, wrong-key rejection, nonce uniqueness
+- `tests/test_entries.py` — unlock flow, encrypted entry create/retrieve, list without password field, lock enforcement, wrong password rejection
+
+Tests use an isolated temporary SQLite database and never touch the real vault file.
