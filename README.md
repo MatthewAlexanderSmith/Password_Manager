@@ -24,11 +24,11 @@ uvicorn main:app --reload
 | POST   | /vault/unlock        | Derive key from master password, store in memory | ✅ Implemented |
 | POST   | /vault/lock          | Wipe in-memory key                               | ✅ Implemented |
 | GET    | /vault/status        | Return lock state                                | ✅ Implemented |
-| GET    | /entries             | List all entries (metadata only)                 | ⏳ Pending     |
+| GET    | /entries             | List all entries (metadata only)                 | ✅ Implemented |
 | POST   | /entries             | Create entry with encrypted password             | ✅ Implemented |
 | GET    | /entries/{id}        | Retrieve entry with decrypted password           | ✅ Implemented |
-| PUT    | /entries/{id}        | Update entry                                     | ⏳ Pending     |
-| DELETE | /entries/{id}        | Delete entry                                     | ⏳ Pending     |
+| PUT    | /entries/{id}        | Update entry                                     | ✅ Implemented |
+| DELETE | /entries/{id}        | Delete entry                                     | ✅ Implemented |
 | POST   | /ai/score-password   | Stub — to be implemented by Paul                 | 🔲 Stub only   |
 | POST   | /breach/check        | Stub — to be implemented by Paul                 | 🔲 Stub only   |
 | POST   | /export/quantum-safe | Stub — to be implemented by Omar                 | 🔲 Stub only   |

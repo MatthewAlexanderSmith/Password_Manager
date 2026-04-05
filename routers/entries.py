@@ -17,6 +17,13 @@ class EntryCreate(BaseModel):
     password: str
     tags: str | None = ""
 
+class EntryUpdate(BaseModel):
+    title: str | None = None
+    username: str | None = None
+    url: str | None = None
+    password: str | None = None
+    tags: str | None = None
+
 
 @router.post("")
 def create_entry(req: EntryCreate):
@@ -74,3 +81,93 @@ def get_entry(entry_id: int):
         "password": password,
         "tags": row["tags"],
     }
+
+@router.get("")
+def list_entries():
+    session.get_key()  # enforce unlocked
+
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT id, title, username, url, tags, created_at, updated_at
+            FROM vault_entries
+            ORDER BY created_at DESC
+            """
+        ).fetchall()
+
+    return [
+        {
+            "id": row["id"],
+            "title": row["title"],
+            "username": row["username"],
+            "url": row["url"],
+            "tags": row["tags"],
+            "created_at": row["created_at"],
+            "updated_at": row["updated_at"],
+        }
+        for row in rows
+    ]
+
+@router.delete("/{entry_id}")
+def delete_entry(entry_id: int):
+    session.get_key()
+
+    with get_connection() as conn:
+        cursor = conn.execute(
+            "DELETE FROM vault_entries WHERE id = ?",
+            (entry_id,),
+        )
+
+        if cursor.rowcount == 0:
+            return {"error": "Not found"}
+
+    return {"status": "deleted"}
+
+@router.put("/{entry_id}")
+def update_entry(entry_id: int, req: EntryUpdate):
+    key = session.get_key()
+
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT * FROM vault_entries WHERE id = ?",
+            (entry_id,),
+        ).fetchone()
+
+        if row is None:
+            return {"error": "Not found"}
+
+        # Prepare updated values
+        title = req.title if req.title is not None else row["title"]
+        username = req.username if req.username is not None else row["username"]
+        url = req.url if req.url is not None else row["url"]
+        tags = req.tags if req.tags is not None else row["tags"]
+
+        ciphertext = row["encrypted_password"]
+        nonce = row["nonce"]
+        tag = row["tag"]
+
+        # If password updated → re-encrypt
+        if req.password is not None:
+            ciphertext, nonce, tag = encrypt(req.password.encode(), key)
+
+        conn.execute(
+            """
+            UPDATE vault_entries
+            SET title = ?, username = ?, url = ?, tags = ?,
+                encrypted_password = ?, nonce = ?, tag = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            """,
+            (
+                title,
+                username,
+                url,
+                tags,
+                ciphertext,
+                nonce,
+                tag,
+                entry_id,
+            ),
+        )
+
+    return {"status": "updated"}
