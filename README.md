@@ -208,14 +208,6 @@ This module is optional and not required for core functionality.
 
 ---
 
-## Known Issues
-
-- Session state relies on in-memory storage and is not suitable for multi-instance deployment
-- pywebview bridge may occasionally introduce request inconsistencies
-- AI module is experimental and not production-ready
-
----
-
 ## License
 
 This project is licensed under the MIT Licence.
