@@ -1,1 +1,0 @@
-- Saving an entry / locking and unlocking the vault now throws no error, the UI is just not updated ==> doesn't add new entry until app is closed and opened again. (locking => unlocking does not work, throws same error, displays nothing)
