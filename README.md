@@ -43,14 +43,10 @@ The system is divided into modular components:
 The application follows a simple layered architecture:
 
 Frontend (User Interface)
-        ↓
-pywebview / HTTP bridge
-        ↓
-FastAPI backend service
-        ↓
-SQLite database
-        ↓
-Cryptography layer (Argon2id + AES-GCM)
+→ pywebview / HTTP bridge
+→ FastAPI backend service
+→ SQLite database
+→ Cryptography layer (Argon2id + AES-GCM)
 
 ---
 
