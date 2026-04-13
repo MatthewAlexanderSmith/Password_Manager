@@ -43,24 +43,24 @@ The system is divided into modular components:
 The application follows a simple layered architecture:
 
 Frontend (User Interface)
-↓
+        ↓
 pywebview / HTTP bridge
-↓
+        ↓
 FastAPI backend service
-↓
+        ↓
 SQLite database
-↓
-Cryptography layer (Argon2id and AES-GCM)
+        ↓
+Cryptography layer (Argon2id + AES-GCM)
 
 ---
 
 ## Project Structure
 
 feature/
-├── frontend/        User interface (HTML, CSS, JavaScript)
-├── backend-api/     FastAPI backend and route handlers
-├── cryptography/    Encryption, key derivation, and vault logic
-├── ai-algorithm/    Experimental AI-based password analysis
+├── frontend/          # User interface (HTML, CSS, JavaScript)
+├── backend-api/       # FastAPI backend and route handlers
+├── cryptography/      # Encryption, key derivation, and vault logic
+├── ai-algorithm/      # Experimental AI-based password analysis
 
 ---
 
