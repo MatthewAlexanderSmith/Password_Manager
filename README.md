@@ -56,7 +56,7 @@ feature/
 ├── frontend/          # User interface (HTML, CSS, JavaScript)
 ├── backend-api/       # FastAPI backend and route handlers
 ├── cryptography/      # Encryption, key derivation, and vault logic
-├── ai-algorithm/      # Experimental AI-based password analysis
+└── ai-algorithm/      # Experimental AI-based password analysis
 
 ---
 
