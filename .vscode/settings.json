@@ -1,0 +1,7 @@
+{
+  "python.analysis.extraPaths": [
+    "./backend-api",
+    "./ai-algorithms/bloom",
+    "./ai-algorithms/ai"
+  ]
+}
