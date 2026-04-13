@@ -217,15 +217,6 @@ This branch is a focused technical foundation rather than a polished end-user ap
 - assumes the caller is comfortable working with Python modules
 - uses sample values in the demonstration blocks, which should not be reused in real deployments
 
-## Possible future improvements
-
-- Add a proper command-line interface
-- Build a desktop or web front end
-- Introduce tests for encryption, decryption and backup flows
-- Add password generation
-- Support editing and rotating stored credentials
-- Improve vault integrity checks and recovery workflows
-- Add packaging and dependency pinning
 
 ## Licence
 
