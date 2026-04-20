@@ -1,540 +1,979 @@
-<!DOCTYPE html>
+<!doctype html>
 
 <html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>CogniVault</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@300;400;500&amp;family=Raleway:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
-<link href="./css/styles.css" rel="stylesheet"/>
-</head>
-<body>
-<div class="geo-bg"></div>
-<!-- ═══════════════════════════════════════════════
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>CogniVault</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@300;400;500&amp;family=Raleway:wght@300;400;500;600&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link href="./css/styles.css" rel="stylesheet" />
+  </head>
+  <div id="vault-transition">
+    <div class="vault-core"></div>
+  </div>
+  <body>
+    <div class="geo-bg"></div>
+    <!-- ═══════════════════════════════════════════════
      LOCK SCREEN
 ═══════════════════════════════════════════════ -->
-<div class="view active" id="view-lock">
-<div class="lock-wrap">
-<div class="lock-logo">
-<div class="lock-shield">
-<svg fill="none" viewbox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
-<path d="M36 4L8 16V36C8 52 20 65 36 68C52 65 64 52 64 36V16L36 4Z" fill="#0d0d18" stroke="#c9a84c" stroke-width="1.5"></path>
-<path d="M36 10L14 20V36C14 49 24 59.5 36 62C48 59.5 58 49 58 36V20L36 10Z" fill="#13131f" stroke="#c9a84c" stroke-opacity="0.5" stroke-width="0.75"></path>
-<!-- Keyhole -->
-<circle cx="36" cy="31" fill="none" r="6" stroke="#c9a84c" stroke-width="1.5"></circle>
-<rect fill="#c9a84c" fill-opacity="0.8" height="9" rx="1" width="6" x="33" y="34"></rect>
-<!-- Corner ornaments -->
-<path d="M20 18L24 16" stroke="#c9a84c" stroke-opacity="0.6" stroke-width="0.75"></path>
-<path d="M52 18L48 16" stroke="#c9a84c" stroke-opacity="0.6" stroke-width="0.75"></path>
-</svg>
-</div>
-<div class="lock-title">CogniVault</div>
-<div class="lock-subtitle">Local · AI-Enhanced · Quantum-Safe</div>
-</div>
-<div class="lock-card">
-<label class="lock-label">Master Password</label>
-<input autocomplete="current-password" class="lock-input" id="master-pw-input" placeholder="Enter master password" type="password"/>
-<div class="lock-hint">Secured with Argon2id + AES-256-GCM</div>
-<div class="lock-error" id="lock-error"></div>
-<button class="btn-unlock" id="btn-unlock" onclick="handleUnlock()">
-        Unlock Vault
-      </button>
-</div>
-<div class="lock-new">
-      First time? <a onclick="showCreateVaultModal()">Create a new vault</a>
-</div>
-<div class="lock-badges">
-<span class="lock-badge">AES-256-GCM</span>
-<span class="lock-badge">ML-KEM</span>
-<span class="lock-badge">Argon2id</span>
-</div>
-</div>
-</div>
-<!-- ═══════════════════════════════════════════════
+    <div class="view active" id="view-lock">
+      <div class="lock-wrap">
+        <div class="lock-logo">
+          <div class="lock-shield">
+            <svg
+              fill="none"
+              viewbox="0 0 72 72"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M36 4L8 16V36C8 52 20 65 36 68C52 65 64 52 64 36V16L36 4Z"
+                fill="#0d0d18"
+                stroke="#c9a84c"
+                stroke-width="1.5"
+              ></path>
+              <path
+                d="M36 10L14 20V36C14 49 24 59.5 36 62C48 59.5 58 49 58 36V20L36 10Z"
+                fill="#13131f"
+                stroke="#c9a84c"
+                stroke-opacity="0.5"
+                stroke-width="0.75"
+              ></path>
+              <!-- Keyhole -->
+              <circle
+                cx="36"
+                cy="31"
+                fill="none"
+                r="6"
+                stroke="#c9a84c"
+                stroke-width="1.5"
+              ></circle>
+              <rect
+                fill="#c9a84c"
+                fill-opacity="0.8"
+                height="9"
+                rx="1"
+                width="6"
+                x="33"
+                y="34"
+              ></rect>
+              <!-- Corner ornaments -->
+              <path
+                d="M20 18L24 16"
+                stroke="#c9a84c"
+                stroke-opacity="0.6"
+                stroke-width="0.75"
+              ></path>
+              <path
+                d="M52 18L48 16"
+                stroke="#c9a84c"
+                stroke-opacity="0.6"
+                stroke-width="0.75"
+              ></path>
+            </svg>
+          </div>
+          <div class="lock-title">CogniVault</div>
+          <div class="lock-subtitle">Local · AI-Enhanced · Quantum-Safe</div>
+        </div>
+        <div class="lock-card">
+          <label class="lock-label">Master Password</label>
+          <input
+            autocomplete="current-password"
+            class="lock-input"
+            id="master-pw-input"
+            placeholder="Enter master password"
+            type="password"
+          />
+          <div class="lock-hint">Secured with Argon2id + AES-256-GCM</div>
+          <div class="lock-error" id="lock-error"></div>
+          <button class="btn-unlock" id="btn-unlock" onclick="handleUnlock()">
+            Unlock Vault
+          </button>
+        </div>
+        <div class="lock-new">
+          First time? <a onclick="showCreateVaultModal()">Create a new vault</a>
+        </div>
+        <div class="lock-badges">
+          <span class="lock-badge">AES-256-GCM</span>
+          <span class="lock-badge">ML-KEM</span>
+          <span class="lock-badge">Argon2id</span>
+        </div>
+      </div>
+    </div>
+    <!-- ═══════════════════════════════════════════════
      MAIN APP
 ═══════════════════════════════════════════════ -->
-<div class="view" id="view-app">
-<!-- Sidebar -->
-<aside class="sidebar">
-<div class="sidebar-header">
-<div class="sidebar-logo-icon">
-<svg fill="none" viewbox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
-<path d="M14 2L3 7V14C3 20.5 8 26 14 27C20 26 25 20.5 25 14V7L14 2Z" fill="#0d0d18" stroke="#c9a84c" stroke-width="1.2"></path>
-<circle cx="14" cy="12" fill="none" r="3" stroke="#c9a84c" stroke-width="1.2"></circle>
-<rect fill="#c9a84c" height="5" rx="0.5" width="3" x="12.5" y="13.5"></rect>
-</svg>
-</div>
-<div class="sidebar-brand">
-<div class="sidebar-name">CogniVault</div>
-<div class="sidebar-ver">v1.0 · PQC</div>
-</div>
-</div>
-<nav class="sidebar-nav">
-<div class="nav-section-label">Vault</div>
-<div class="nav-item active" onclick="switchPanel('vault')">
-<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.3" viewbox="0 0 16 16">
-<rect height="9" rx="1" width="12" x="2" y="5"></rect>
-<path d="M5 5V4a3 3 0 016 0v1"></path>
-<circle cx="8" cy="9.5" fill="currentColor" r="1.2" stroke="none"></circle>
-</svg>
-        Credentials
-        <span class="nav-badge" id="entry-count-badge">0</span>
-</div>
-<div class="nav-item" onclick="switchPanel('generator')">
-<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.3" viewbox="0 0 16 16">
-<path d="M2 8h2M12 8h2M8 2v2M8 12v2"></path>
-<circle cx="8" cy="8" r="3"></circle>
-<path d="M4.5 4.5l1 1M10.5 10.5l1 1M4.5 11.5l1-1M10.5 5.5l1-1"></path>
-</svg>
-        Generator
-      </div>
-<div class="nav-section-label" style="margin-top:8px">Security</div>
-<div class="nav-item" onclick="switchPanel('breach')">
-<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.3" viewbox="0 0 16 16">
-<path d="M8 1L1.5 4v5C1.5 12.5 4.5 15 8 15s6.5-2.5 6.5-6V4L8 1z"></path>
-<path d="M5.5 8l2 2 3-3" stroke-linecap="round"></path>
-</svg>
-        Breach Check
-      </div>
-<div class="nav-section-label" style="margin-top:8px">System</div>
-<div class="nav-item" onclick="switchPanel('export')">
-<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.3" viewbox="0 0 16 16">
-<path d="M4 12h8M8 3v7M5 7l3 3 3-3"></path>
-</svg>
-        Export
-      </div>
-<div class="nav-item" onclick="switchPanel('settings')">
-<svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.3" viewbox="0 0 16 16">
-<circle cx="8" cy="8" r="2"></circle>
-<path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M3.2 12.8l1.4-1.4M11.4 4.6l1.4-1.4"></path>
-</svg>
-        Settings
-      </div>
-</nav>
-<div class="sidebar-footer">
-<div class="vault-status">
-<div class="status-dot"></div>
-        Vault unlocked
-      </div>
-<button class="btn-lock" onclick="handleLock()">
-<svg fill="none" height="10" stroke="currentColor" stroke-width="1.5" viewbox="0 0 16 16" width="10">
-<rect height="8" rx="1" width="10" x="3" y="7"></rect>
-<path d="M5 7V5a3 3 0 016 0v2"></path>
-</svg>
-        Lock Vault
-      </button>
-</div>
-</aside>
-<!-- Main -->
-<div class="main-content">
-<div class="topbar">
-<div class="topbar-title" id="topbar-title">CREDENTIALS</div>
-<div class="search-wrap" id="search-wrap">
-<svg class="search-icon" fill="none" height="13" stroke="currentColor" stroke-width="1.5" viewbox="0 0 16 16" width="13">
-<circle cx="7" cy="7" r="5"></circle><path d="M11 11l3 3"></path>
-</svg>
-<input class="search-input" id="search-input" oninput="filterEntries()" placeholder="Search vault…"/>
-</div>
-<button class="btn-primary" id="btn-add-entry" onclick="openAddModal()">
-<svg fill="none" height="11" stroke="currentColor" stroke-width="2" viewbox="0 0 16 16" width="11">
-<path d="M8 2v12M2 8h12"></path>
-</svg>
-        Add Entry
-      </button>
-</div>
-<div class="page-content">
-<!-- VAULT PANEL -->
-<div class="panel active" id="panel-vault">
-<div class="panel-actions">
-<div class="panel-heading">Stored Credentials</div>
-<div class="text-muted" id="vault-count-label">Loading…</div>
-</div>
-<div class="entry-list" id="entry-list">
-<div class="empty-state" id="empty-state">
-<div class="empty-icon">
-<svg fill="none" height="24" stroke="currentColor" stroke-width="1.2" viewbox="0 0 24 24" width="24">
-<rect height="11" rx="2" width="18" x="3" y="11"></rect>
-<path d="M7 11V7a5 5 0 0110 0v4"></path>
-</svg>
-</div>
-<div class="empty-title">No Credentials Stored</div>
-<div class="empty-desc mt-2">Add your first entry to begin securing your vault.</div>
-</div>
-</div>
-</div>
-<!-- GENERATOR PANEL -->
-<div class="panel" id="panel-generator">
-<div class="panel-actions" style="margin-bottom:20px">
-<div class="panel-heading">Password Generator</div>
-</div>
-<div class="gen-output">
-<span class="gen-output-text" id="gen-output">Click Generate to create a password</span>
-<button class="gen-copy-btn" onclick="copyGenerated()">Copy</button>
-</div>
-<div class="gen-strength-wrap">
-<div class="gen-strength-title">Strength Analysis</div>
-<div class="strength-bar-bg">
-<div class="strength-bar-fill" id="gen-strength-fill"></div>
-</div>
-<div class="strength-label" id="gen-strength-label" style="color:var(--text-muted)"></div>
-</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:24px">
-<div>
-<div class="range-wrap">
-<div class="range-header">
-<span class="range-label">Length</span>
-<span class="range-val" id="gen-length-val">20</span>
-</div>
-<input class="range-input" id="gen-length" max="64" min="8" oninput="document.getElementById('gen-length-val').textContent=this.value" type="range" value="20"/>
-</div>
-</div>
-<div>
-<div class="toggle-group">
-<div class="toggle-row">
-<span class="toggle-label">Uppercase (A-Z)</span>
-<div class="toggle on" id="tog-upper" onclick="toggleOpt(this)"></div>
-</div>
-<div class="toggle-row">
-<span class="toggle-label">Lowercase (a-z)</span>
-<div class="toggle on" id="tog-lower" onclick="toggleOpt(this)"></div>
-</div>
-<div class="toggle-row">
-<span class="toggle-label">Numbers (0-9)</span>
-<div class="toggle on" id="tog-digits" onclick="toggleOpt(this)"></div>
-</div>
-<div class="toggle-row">
-<span class="toggle-label">Symbols (!@#…)</span>
-<div class="toggle on" id="tog-symbols" onclick="toggleOpt(this)"></div>
-</div>
-</div>
-</div>
-</div>
-<button class="btn-regen" onclick="generatePassword()">
-<svg fill="none" height="14" stroke="currentColor" stroke-width="1.5" viewbox="0 0 16 16" width="14">
-<path d="M2 8a6 6 0 1011.3-2.8" stroke-linecap="round"></path>
-<path d="M13 3l.5 2.5L11 6" stroke-linecap="round" stroke-linejoin="round"></path>
-</svg>
-          Generate Secure Password
-        </button>
-</div>
-<!-- BREACH CHECK PANEL -->
-<div class="panel" id="panel-breach">
-<div class="breach-hero">
-<div class="breach-icon">
-<svg fill="none" height="56" stroke="currentColor" stroke-width="1.2" viewbox="0 0 56 56" width="56">
-<path d="M28 4L6 14v18C6 44 16 53 28 54C40 53 50 44 50 32V14L28 4z"></path>
-<path d="M28 20v10M28 34v2" stroke-linecap="round" stroke-width="2"></path>
-</svg>
-</div>
-<div class="breach-hero-title">Breach Intelligence Check</div>
-<div class="breach-hero-desc">
-            Checks against 600M+ compromised passwords via Bloom Filter.<br/>
-            Your password never leaves this device.
+    <div class="view" id="view-app">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo-icon">
+            <svg
+              fill="none"
+              viewbox="0 0 28 28"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M14 2L3 7V14C3 20.5 8 26 14 27C20 26 25 20.5 25 14V7L14 2Z"
+                fill="#0d0d18"
+                stroke="#c9a84c"
+                stroke-width="1.2"
+              ></path>
+              <circle
+                cx="14"
+                cy="12"
+                fill="none"
+                r="3"
+                stroke="#c9a84c"
+                stroke-width="1.2"
+              ></circle>
+              <rect
+                fill="#c9a84c"
+                height="5"
+                rx="0.5"
+                width="3"
+                x="12.5"
+                y="13.5"
+              ></rect>
+            </svg>
           </div>
-<div class="breach-input-wrap">
-<input class="breach-input" id="breach-input" onkeydown="if(event.key==='Enter')checkBreach()" placeholder="Enter password to check…" type="password"/>
-<button class="btn-breach" onclick="checkBreach()">Check</button>
-</div>
-<div class="breach-result-box" id="breach-result">
-<div class="breach-result-status" id="breach-status"></div>
-<div class="breach-result-detail" id="breach-detail"></div>
-</div>
-</div>
-<div class="stats-grid">
-<div class="stat-card">
-<div class="stat-number">600M+</div>
-<div class="stat-label">Known Breached</div>
-</div>
-<div class="stat-card">
-<div class="stat-number">O(k)</div>
-<div class="stat-label">Lookup Complexity</div>
-</div>
-<div class="stat-card">
-<div class="stat-number">&lt;1%</div>
-<div class="stat-label">False Positive Rate</div>
-</div>
-</div>
-</div>
-<!-- EXPORT PANEL -->
-<div class="panel" id="panel-export">
-<div class="panel-actions" style="margin-bottom:24px">
-<div class="panel-heading">Vault Export</div>
-</div>
-<div class="settings-section">
-<div class="settings-section-title">Export Options</div>
-<div style="background:var(--bg-card);border:1px solid var(--border-dim);padding:24px">
-<div class="form-group">
-<label class="form-label">Export Format</label>
-<select class="form-input" id="export-format" style="cursor:pointer">
-<option value="encrypted">Encrypted Vault (.enc) — ML-KEM Protected</option>
-<option value="json">JSON Backup (unencrypted, use with caution)</option>
-</select>
-</div>
-<div class="form-group">
-<label class="form-label">Export Password (for encrypted format)</label>
-<input class="form-input" id="export-password" placeholder="Leave blank to use master password" type="password"/>
-</div>
-<div class="flex gap-2" style="justify-content:flex-end">
-<button class="btn-primary" onclick="handleExport()">
-<svg fill="none" height="11" stroke="currentColor" stroke-width="2" viewbox="0 0 16 16" width="11">
-<path d="M4 12h8M8 3v7M5 7l3 3 3-3"></path>
-</svg>
-                Export Vault
+          <div class="sidebar-brand">
+            <div class="sidebar-name">CogniVault</div>
+            <div class="sidebar-ver">v1.0 · PQC</div>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="nav-section-label">Vault</div>
+          <div class="nav-item active" onclick="switchPanel('vault')">
+            <svg
+              class="nav-icon"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              viewbox="0 0 16 16"
+            >
+              <rect height="9" rx="1" width="12" x="2" y="5"></rect>
+              <path d="M5 5V4a3 3 0 016 0v1"></path>
+              <circle
+                cx="8"
+                cy="9.5"
+                fill="currentColor"
+                r="1.2"
+                stroke="none"
+              ></circle>
+            </svg>
+            Credentials
+            <span class="nav-badge" id="entry-count-badge">0</span>
+          </div>
+          <div class="nav-item" onclick="switchPanel('generator')">
+            <svg
+              class="nav-icon"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              viewbox="0 0 16 16"
+            >
+              <path d="M2 8h2M12 8h2M8 2v2M8 12v2"></path>
+              <circle cx="8" cy="8" r="3"></circle>
+              <path
+                d="M4.5 4.5l1 1M10.5 10.5l1 1M4.5 11.5l1-1M10.5 5.5l1-1"
+              ></path>
+            </svg>
+            Generator
+          </div>
+          <div class="nav-section-label" style="margin-top: 8px">Security</div>
+          <div class="nav-item" onclick="switchPanel('breach')">
+            <svg
+              class="nav-icon"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              viewbox="0 0 16 16"
+            >
+              <path
+                d="M8 1L1.5 4v5C1.5 12.5 4.5 15 8 15s6.5-2.5 6.5-6V4L8 1z"
+              ></path>
+              <path d="M5.5 8l2 2 3-3" stroke-linecap="round"></path>
+            </svg>
+            Breach Check
+          </div>
+          <div class="nav-section-label" style="margin-top: 8px">System</div>
+          <div class="nav-item" onclick="switchPanel('export')">
+            <svg
+              class="nav-icon"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              viewbox="0 0 16 16"
+            >
+              <path d="M4 12h8M8 3v7M5 7l3 3 3-3"></path>
+            </svg>
+            Export
+          </div>
+          <div class="nav-item" onclick="switchPanel('settings')">
+            <svg
+              class="nav-icon"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              viewbox="0 0 16 16"
+            >
+              <circle cx="8" cy="8" r="2"></circle>
+              <path
+                d="M8 1v2M8 13v2M1 8h2M13 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M3.2 12.8l1.4-1.4M11.4 4.6l1.4-1.4"
+              ></path>
+            </svg>
+            Settings
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="vault-status">
+            <div class="status-dot"></div>
+            Vault unlocked
+          </div>
+          <button class="btn-lock" onclick="handleLock()">
+            <svg
+              fill="none"
+              height="10"
+              stroke="currentColor"
+              stroke-width="1.5"
+              viewbox="0 0 16 16"
+              width="10"
+            >
+              <rect height="8" rx="1" width="10" x="3" y="7"></rect>
+              <path d="M5 7V5a3 3 0 016 0v2"></path>
+            </svg>
+            Lock Vault
+          </button>
+        </div>
+      </aside>
+      <!-- Main -->
+      <div class="main-content">
+        <div class="topbar">
+          <div class="topbar-title" id="topbar-title">CREDENTIALS</div>
+          <div class="search-wrap" id="search-wrap">
+            <svg
+              class="search-icon"
+              fill="none"
+              height="13"
+              stroke="currentColor"
+              stroke-width="1.5"
+              viewbox="0 0 16 16"
+              width="13"
+            >
+              <circle cx="7" cy="7" r="5"></circle>
+              <path d="M11 11l3 3"></path>
+            </svg>
+            <input
+              class="search-input"
+              id="search-input"
+              oninput="filterEntries()"
+              placeholder="Search vault…"
+            />
+          </div>
+          <button
+            class="btn-primary"
+            id="btn-add-entry"
+            onclick="openAddModal()"
+          >
+            <svg
+              fill="none"
+              height="11"
+              stroke="currentColor"
+              stroke-width="2"
+              viewbox="0 0 16 16"
+              width="11"
+            >
+              <path d="M8 2v12M2 8h12"></path>
+            </svg>
+            Add Entry
+          </button>
+        </div>
+        <div class="page-content">
+          <!-- VAULT PANEL -->
+          <div class="panel active" id="panel-vault">
+            <div class="panel-actions">
+              <div class="panel-heading">Stored Credentials</div>
+              <div class="text-muted" id="vault-count-label">Loading…</div>
+            </div>
+            <div class="entry-list" id="entry-list">
+              <div class="empty-state" id="empty-state">
+                <div class="empty-icon">
+                  <svg
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    stroke-width="1.2"
+                    viewbox="0 0 24 24"
+                    width="24"
+                  >
+                    <rect height="11" rx="2" width="18" x="3" y="11"></rect>
+                    <path d="M7 11V7a5 5 0 0110 0v4"></path>
+                  </svg>
+                </div>
+                <div class="empty-title">No Credentials Stored</div>
+                <div class="empty-desc mt-2">
+                  Add your first entry to begin securing your vault.
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- GENERATOR PANEL -->
+          <div class="panel" id="panel-generator">
+            <div class="panel-actions" style="margin-bottom: 20px">
+              <div class="panel-heading">Password Generator</div>
+            </div>
+            <div class="gen-output">
+              <span class="gen-output-text" id="gen-output"
+                >Click Generate to create a password</span
+              >
+              <button class="gen-copy-btn" onclick="copyGenerated()">
+                Copy
               </button>
-</div>
-</div>
-</div>
-<div class="settings-section">
-<div class="settings-section-title">Import Backup</div>
-<div style="background:var(--bg-card);border:1px solid var(--border-dim);padding:24px">
-<div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);line-height:1.8;margin-bottom:16px">
-            Import a previously exported CogniVault backup. Only import files you trust.
-          </div>
-<div class="form-group">
-<label class="form-label">Backup File</label>
-<input class="form-input" id="import-file" accept=".enc,.json,application/json,text/plain" type="file"/>
-</div>
-<div class="flex gap-2" style="justify-content:flex-end">
-<button class="btn-primary" id="btn-import" onclick="handleImport()">
-<svg fill="none" height="11" stroke="currentColor" stroke-width="2" viewbox="0 0 16 16" width="11">
-<path d="M4 12h8M8 3v7M5 7l3 3 3-3"></path>
-</svg>
-                Import Vault
-              </button>
-</div>
-</div>
-</div>
-<div class="settings-section">
-<div class="settings-section-title">Post-Quantum Security</div>
-<div style="font-family:var(--font-mono);font-size:11px;color:var(--text-second);line-height:1.9;margin-bottom:16px">
-            Encrypted exports use ML-KEM (CRYSTALS-Kyber768, NIST FIPS 203) for key encapsulation.
-            Vault data is protected with AES-256-GCM. Secure against both classical and quantum adversaries.
-          </div>
-<div class="crypto-badges">
-<span class="crypto-badge">ML-KEM / Kyber768</span>
-<span class="crypto-badge">NIST FIPS 203</span>
-<span class="crypto-badge">AES-256-GCM</span>
-<span class="crypto-badge">NIST Level 3</span>
-</div>
-</div>
-</div>
-<!-- SETTINGS PANEL -->
-<div class="panel" id="panel-settings">
-<div class="panel-actions" style="margin-bottom:24px">
-<div class="panel-heading">Settings &amp; Security</div>
-</div>
-<div class="settings-section">
-<div class="settings-section-title">Cryptographic Configuration</div>
-<div class="settings-row">
-<div>
-<div class="settings-key">Encryption Algorithm</div>
-<div class="settings-desc">AES-256-GCM with authenticated encryption (AEAD)</div>
-</div>
-<span class="text-muted">AES-256-GCM</span>
-</div>
-<div class="settings-row">
-<div>
-<div class="settings-key">Key Derivation Function</div>
-<div class="settings-desc">Memory-hard, Argon2id — 64MB RAM, 3 iterations</div>
-</div>
-<span class="text-muted">Argon2id</span>
-</div>
-<div class="settings-row">
-<div>
-<div class="settings-key">Post-Quantum Algorithm</div>
-<div class="settings-desc">CRYSTALS-Kyber768 (ML-KEM), NIST FIPS 203, Level 3</div>
-</div>
-<span class="text-muted">ML-KEM</span>
-</div>
-<div class="settings-row">
-<div>
-<div class="settings-key">Storage</div>
-<div class="settings-desc">SQLite metadata + Encrypted JSON blobs on disk</div>
-</div>
-<span class="text-muted">Local only</span>
-</div>
-</div>
-<div class="settings-section">
-<div class="settings-section-title">AI Strength Engine</div>
-<div class="settings-row">
-<div>
-<div class="settings-key">Model</div>
-<div class="settings-desc">Random Forest classifier, trained on breach corpus (RockYou)</div>
-</div>
-<span class="text-muted">Offline RF</span>
-</div>
-<div class="settings-row">
-<div>
-<div class="settings-key">Inference</div>
-<div class="settings-desc">O(T×D) → effectively O(1), runs in microseconds locally</div>
-</div>
-<span class="text-muted">Edge compute</span>
-</div>
-<div class="settings-row">
-<div>
-<div class="settings-key">Bloom Filter corpus</div>
-<div class="settings-desc">600M+ SHA-1 hashed breach passwords, ~200MB bit array</div>
-</div>
-<span class="text-muted">k=7 hashes</span>
-</div>
-</div>
-<div class="settings-section">
-<div class="settings-section-title">Vault Actions</div>
-<div class="settings-row">
-<div>
-<div class="settings-key">Create Backup</div>
-<div class="settings-desc">Encrypted ZIP backup of all vault data and metadata</div>
-</div>
-<button class="btn-secondary" onclick="handleBackup()">
-              Create Backup
+            </div>
+            <div class="gen-strength-wrap">
+              <div class="gen-strength-title">Strength Analysis</div>
+              <div class="strength-bar-bg">
+                <div class="strength-bar-fill" id="gen-strength-fill"></div>
+              </div>
+              <div
+                class="strength-label"
+                id="gen-strength-label"
+                style="color: var(--text-muted)"
+              ></div>
+            </div>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 28px;
+                margin-bottom: 24px;
+              "
+            >
+              <div>
+                <div class="range-wrap">
+                  <div class="range-header">
+                    <span class="range-label">Length</span>
+                    <span class="range-val" id="gen-length-val">20</span>
+                  </div>
+                  <input
+                    class="range-input"
+                    id="gen-length"
+                    max="64"
+                    min="8"
+                    oninput="
+                      document.getElementById('gen-length-val').textContent =
+                        this.value
+                    "
+                    type="range"
+                    value="20"
+                  />
+                </div>
+              </div>
+              <div>
+                <div class="toggle-group">
+                  <div class="toggle-row">
+                    <span class="toggle-label">Uppercase (A-Z)</span>
+                    <div
+                      class="toggle on"
+                      id="tog-upper"
+                      onclick="toggleOpt(this)"
+                    ></div>
+                  </div>
+                  <div class="toggle-row">
+                    <span class="toggle-label">Lowercase (a-z)</span>
+                    <div
+                      class="toggle on"
+                      id="tog-lower"
+                      onclick="toggleOpt(this)"
+                    ></div>
+                  </div>
+                  <div class="toggle-row">
+                    <span class="toggle-label">Numbers (0-9)</span>
+                    <div
+                      class="toggle on"
+                      id="tog-digits"
+                      onclick="toggleOpt(this)"
+                    ></div>
+                  </div>
+                  <div class="toggle-row">
+                    <span class="toggle-label">Symbols (!@#…)</span>
+                    <div
+                      class="toggle on"
+                      id="tog-symbols"
+                      onclick="toggleOpt(this)"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="btn-regen" onclick="generatePassword()">
+              <svg
+                fill="none"
+                height="14"
+                stroke="currentColor"
+                stroke-width="1.5"
+                viewbox="0 0 16 16"
+                width="14"
+              >
+                <path d="M2 8a6 6 0 1011.3-2.8" stroke-linecap="round"></path>
+                <path
+                  d="M13 3l.5 2.5L11 6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+              Generate Secure Password
             </button>
-</div>
-<div class="settings-row">
-<div>
-<div class="settings-key">Lock Session</div>
-<div class="settings-desc">Clears the derived key from memory immediately</div>
-</div>
-<button class="btn-secondary" onclick="handleLock()">
-              Lock Now
-            </button>
-</div>
-</div>
-</div>
-</div><!-- /page-content -->
-</div><!-- /main-content -->
-</div><!-- /view-app -->
-<!-- ═══════════════════════════════════════════════
+          </div>
+          <!-- BREACH CHECK PANEL -->
+          <div class="panel" id="panel-breach">
+            <div class="breach-hero">
+              <div class="breach-icon">
+                <svg
+                  fill="none"
+                  height="56"
+                  stroke="currentColor"
+                  stroke-width="1.2"
+                  viewbox="0 0 56 56"
+                  width="56"
+                >
+                  <path
+                    d="M28 4L6 14v18C6 44 16 53 28 54C40 53 50 44 50 32V14L28 4z"
+                  ></path>
+                  <path
+                    d="M28 20v10M28 34v2"
+                    stroke-linecap="round"
+                    stroke-width="2"
+                  ></path>
+                </svg>
+              </div>
+              <div class="breach-hero-title">Breach Intelligence Check</div>
+              <div class="breach-hero-desc">
+                Checks against 600M+ compromised passwords via Bloom Filter.<br />
+                Your password never leaves this device.
+              </div>
+              <div class="breach-input-wrap">
+                <input
+                  class="breach-input"
+                  id="breach-input"
+                  onkeydown="if (event.key === 'Enter') checkBreach();"
+                  placeholder="Enter password to check…"
+                  type="password"
+                />
+                <button class="btn-breach" onclick="checkBreach()">
+                  Check
+                </button>
+              </div>
+              <div class="breach-result-box" id="breach-result">
+                <div class="breach-result-status" id="breach-status"></div>
+                <div class="breach-result-detail" id="breach-detail"></div>
+              </div>
+            </div>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-number">600M+</div>
+                <div class="stat-label">Known Breached</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number">O(k)</div>
+                <div class="stat-label">Lookup Complexity</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number">&lt;1%</div>
+                <div class="stat-label">False Positive Rate</div>
+              </div>
+            </div>
+          </div>
+          <!-- EXPORT PANEL -->
+          <div class="panel" id="panel-export">
+            <div class="panel-actions" style="margin-bottom: 24px">
+              <div class="panel-heading">Vault Export</div>
+            </div>
+            <div class="settings-section">
+              <div class="settings-section-title">Export Options</div>
+              <div
+                style="
+                  background: var(--bg-card);
+                  border: 1px solid var(--border-dim);
+                  padding: 24px;
+                "
+              >
+                <div class="form-group">
+                  <label class="form-label">Export Format</label>
+                  <select
+                    class="form-input"
+                    id="export-format"
+                    style="cursor: pointer"
+                  >
+                    <option value="encrypted">
+                      Encrypted Vault (.enc) — ML-KEM Protected
+                    </option>
+                    <option value="json">
+                      JSON Backup (unencrypted, use with caution)
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label"
+                    >Export Password (for encrypted format)</label
+                  >
+                  <input
+                    class="form-input"
+                    id="export-password"
+                    placeholder="Leave blank to use master password"
+                    type="password"
+                  />
+                </div>
+                <div class="flex gap-2" style="justify-content: flex-end">
+                  <button class="btn-primary" onclick="handleExport()">
+                    <svg
+                      fill="none"
+                      height="11"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      viewbox="0 0 16 16"
+                      width="11"
+                    >
+                      <path d="M4 12h8M8 3v7M5 7l3 3 3-3"></path>
+                    </svg>
+                    Export Vault
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="settings-section">
+              <div class="settings-section-title">Import Backup</div>
+              <div
+                style="
+                  background: var(--bg-card);
+                  border: 1px solid var(--border-dim);
+                  padding: 24px;
+                "
+              >
+                <div
+                  style="
+                    font-family: var(--font-mono);
+                    font-size: 11px;
+                    color: var(--text-muted);
+                    line-height: 1.8;
+                    margin-bottom: 16px;
+                  "
+                >
+                  Import a previously exported CogniVault backup. Only import
+                  files you trust.
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Backup File</label>
+                  <input
+                    class="form-input"
+                    id="import-file"
+                    accept=".enc,.json,application/json,text/plain"
+                    type="file"
+                  />
+                </div>
+                <div class="flex gap-2" style="justify-content: flex-end">
+                  <button
+                    class="btn-primary"
+                    id="btn-import"
+                    onclick="handleImport()"
+                  >
+                    <svg
+                      fill="none"
+                      height="11"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      viewbox="0 0 16 16"
+                      width="11"
+                    >
+                      <path d="M4 12h8M8 3v7M5 7l3 3 3-3"></path>
+                    </svg>
+                    Import Vault
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="settings-section">
+              <div class="settings-section-title">Post-Quantum Security</div>
+              <div
+                style="
+                  font-family: var(--font-mono);
+                  font-size: 11px;
+                  color: var(--text-second);
+                  line-height: 1.9;
+                  margin-bottom: 16px;
+                "
+              >
+                Encrypted exports use ML-KEM (CRYSTALS-Kyber768, NIST FIPS 203)
+                for key encapsulation. Vault data is protected with AES-256-GCM.
+                Secure against both classical and quantum adversaries.
+              </div>
+              <div class="crypto-badges">
+                <span class="crypto-badge">ML-KEM / Kyber768</span>
+                <span class="crypto-badge">NIST FIPS 203</span>
+                <span class="crypto-badge">AES-256-GCM</span>
+                <span class="crypto-badge">NIST Level 3</span>
+              </div>
+            </div>
+          </div>
+          <!-- SETTINGS PANEL -->
+          <div class="panel" id="panel-settings">
+            <div class="panel-actions" style="margin-bottom: 24px">
+              <div class="panel-heading">Settings &amp; Security</div>
+            </div>
+            <div class="settings-section">
+              <div class="settings-section-title">
+                Cryptographic Configuration
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-key">Encryption Algorithm</div>
+                  <div class="settings-desc">
+                    AES-256-GCM with authenticated encryption (AEAD)
+                  </div>
+                </div>
+                <span class="text-muted">AES-256-GCM</span>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-key">Key Derivation Function</div>
+                  <div class="settings-desc">
+                    Memory-hard, Argon2id — 64MB RAM, 3 iterations
+                  </div>
+                </div>
+                <span class="text-muted">Argon2id</span>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-key">Post-Quantum Algorithm</div>
+                  <div class="settings-desc">
+                    CRYSTALS-Kyber768 (ML-KEM), NIST FIPS 203, Level 3
+                  </div>
+                </div>
+                <span class="text-muted">ML-KEM</span>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-key">Storage</div>
+                  <div class="settings-desc">
+                    SQLite metadata + Encrypted JSON blobs on disk
+                  </div>
+                </div>
+                <span class="text-muted">Local only</span>
+              </div>
+            </div>
+            <div class="settings-section">
+              <div class="settings-section-title">AI Strength Engine</div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-key">Model</div>
+                  <div class="settings-desc">
+                    Random Forest classifier, trained on breach corpus (RockYou)
+                  </div>
+                </div>
+                <span class="text-muted">Offline RF</span>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-key">Inference</div>
+                  <div class="settings-desc">
+                    O(T×D) → effectively O(1), runs in microseconds locally
+                  </div>
+                </div>
+                <span class="text-muted">Edge compute</span>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-key">Bloom Filter corpus</div>
+                  <div class="settings-desc">
+                    600M+ SHA-1 hashed breach passwords, ~200MB bit array
+                  </div>
+                </div>
+                <span class="text-muted">k=7 hashes</span>
+              </div>
+            </div>
+            <div class="settings-section">
+              <div class="settings-section-title">Vault Actions</div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-key">Create Backup</div>
+                  <div class="settings-desc">
+                    Encrypted ZIP backup of all vault data and metadata
+                  </div>
+                </div>
+                <button class="btn-secondary" onclick="handleBackup()">
+                  Create Backup
+                </button>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-key">Lock Session</div>
+                  <div class="settings-desc">
+                    Clears the derived key from memory immediately
+                  </div>
+                </div>
+                <button class="btn-secondary" onclick="handleLock()">
+                  Lock Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /page-content -->
+      </div>
+      <!-- /main-content -->
+    </div>
+    <!-- /view-app -->
+    <!-- ═══════════════════════════════════════════════
      MODALS
 ═══════════════════════════════════════════════ -->
-<!-- ADD ENTRY MODAL -->
-<div class="modal-overlay" id="modal-add">
-<div class="modal">
-<div class="modal-header">
-<div class="modal-title">Add Credential</div>
-<button class="modal-close" onclick="closeModal('modal-add')">×</button>
-</div>
-<div class="modal-body">
-<div class="form-group">
-<label class="form-label">Site / Service</label>
-<input class="form-input" id="add-site" placeholder="e.g. GitHub, Gmail, Netflix" type="text"/>
-</div>
-<div class="form-group">
-<label class="form-label">Username / Email</label>
-<input class="form-input" id="add-user" placeholder="your@email.com" type="text"/>
-</div>
-<div class="form-group">
-<label class="form-label">Password</label>
-<div class="password-field">
-<input class="form-input" id="add-password" oninput="scorePassword(this.value, 'add-strength-fill', 'add-strength-label', 'add-breach-result')" placeholder="Enter or generate a password" type="password"/>
-<div class="pw-actions">
-<button class="icon-btn" onclick="togglePwVis('add-password', this)" title="Toggle visibility">
-<svg fill="none" height="14" stroke="currentColor" stroke-width="1.3" viewbox="0 0 16 16" width="14">
-<path d="M1 8S3.5 3 8 3s7 5 7 5-2.5 5-7 5-7-5-7-5z"></path>
-<circle cx="8" cy="8" r="2"></circle>
-</svg>
-</button>
-<button class="icon-btn" onclick="fillGenerated('add-password')" title="Generate">
-<svg fill="none" height="14" stroke="currentColor" stroke-width="1.3" viewbox="0 0 16 16" width="14">
-<path d="M2 8a6 6 0 1011.3-2.8" stroke-linecap="round"></path>
-<path d="M13 3l.5 2.5L11 6" stroke-linecap="round"></path>
-</svg>
-</button>
-</div>
-</div>
-<div class="strength-wrap">
-<div class="strength-bar-bg">
-<div class="strength-bar-fill" id="add-strength-fill"></div>
-</div>
-<div class="strength-label" id="add-strength-label"></div>
-<div class="breach-check-result" id="add-breach-result"></div>
-</div>
-</div>
-</div>
-<div class="modal-footer">
-<button class="btn-secondary" onclick="closeModal('modal-add')">Cancel</button>
-<button class="btn-primary" onclick="handleAddEntry()">
-<svg fill="none" height="10" stroke="currentColor" stroke-width="2" viewbox="0 0 16 16" width="10">
-<path d="M3 8l4 4 6-6"></path>
-</svg>
-        Save Entry
-      </button>
-</div>
-</div>
-</div>
-<!-- REVEAL PASSWORD MODAL -->
-<div class="modal-overlay" id="modal-reveal">
-<div class="modal" style="width:420px">
-<div class="modal-header">
-<div class="modal-title" id="reveal-title">Credential</div>
-<button class="modal-close" onclick="closeModal('modal-reveal')">×</button>
-</div>
-<div class="modal-body">
-<div class="form-group">
-<label class="form-label">Site</label>
-<div id="reveal-site-val" style="font-family:var(--font-mono);font-size:13px;color:var(--text-prime)"></div>
-</div>
-<div class="form-group">
-<label class="form-label">Username</label>
-<div id="reveal-user-val" style="font-family:var(--font-mono);font-size:13px;color:var(--text-prime)"></div>
-</div>
-<div class="form-group">
-<label class="form-label">Password</label>
-<div class="reveal-password" id="reveal-pw-val">Loading…</div>
-<div class="copy-confirm" id="reveal-copy-confirm"></div>
-</div>
-</div>
-<div class="modal-footer">
-<button class="btn-secondary" onclick="closeModal('modal-reveal')">Close</button>
-<button class="btn-primary" onclick="copyRevealedPassword()">
-<svg fill="none" height="10" stroke="currentColor" stroke-width="1.8" viewbox="0 0 16 16" width="10">
-<rect height="9" rx="1" width="9" x="5" y="5"></rect>
-<path d="M3 11V3h8"></path>
-</svg>
-        Copy Password
-      </button>
-</div>
-</div>
-</div>
-<!-- CREATE VAULT MODAL -->
-<div class="modal-overlay" id="modal-create">
-<div class="modal">
-<div class="modal-header">
-<div class="modal-title">Create New Vault</div>
-<button class="modal-close" onclick="closeModal('modal-create')">×</button>
-</div>
-<div class="modal-body">
-<div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-bottom:20px;line-height:1.8">
-        Your master password is never stored. It derives a 256-bit AES key via Argon2id.
-        Choose a strong, memorable passphrase.
+    <!-- ADD ENTRY MODAL -->
+    <div class="modal-overlay" id="modal-add">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title">Add Credential</div>
+          <button class="modal-close" onclick="closeModal('modal-add')">
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Site / Service</label>
+            <input
+              class="form-input"
+              id="add-site"
+              placeholder="e.g. GitHub, Gmail, Netflix"
+              type="text"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Username / Email</label>
+            <input
+              class="form-input"
+              id="add-user"
+              placeholder="your@email.com"
+              type="text"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="password-field">
+              <input
+                class="form-input"
+                id="add-password"
+                oninput="
+                  scorePassword(
+                    this.value,
+                    'add-strength-fill',
+                    'add-strength-label',
+                    'add-breach-result',
+                  )
+                "
+                placeholder="Enter or generate a password"
+                type="password"
+              />
+              <div class="pw-actions">
+                <button
+                  class="icon-btn"
+                  onclick="togglePwVis('add-password', this)"
+                  title="Toggle visibility"
+                >
+                  <svg
+                    fill="none"
+                    height="14"
+                    stroke="currentColor"
+                    stroke-width="1.3"
+                    viewbox="0 0 16 16"
+                    width="14"
+                  >
+                    <path d="M1 8S3.5 3 8 3s7 5 7 5-2.5 5-7 5-7-5-7-5z"></path>
+                    <circle cx="8" cy="8" r="2"></circle>
+                  </svg>
+                </button>
+                <button
+                  class="icon-btn"
+                  onclick="fillGenerated('add-password')"
+                  title="Generate"
+                >
+                  <svg
+                    fill="none"
+                    height="14"
+                    stroke="currentColor"
+                    stroke-width="1.3"
+                    viewbox="0 0 16 16"
+                    width="14"
+                  >
+                    <path
+                      d="M2 8a6 6 0 1011.3-2.8"
+                      stroke-linecap="round"
+                    ></path>
+                    <path d="M13 3l.5 2.5L11 6" stroke-linecap="round"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="strength-wrap">
+              <div class="strength-bar-bg">
+                <div class="strength-bar-fill" id="add-strength-fill"></div>
+              </div>
+              <div class="strength-label" id="add-strength-label"></div>
+              <div class="breach-check-result" id="add-breach-result"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeModal('modal-add')">
+            Cancel
+          </button>
+          <button class="btn-primary" onclick="handleAddEntry()">
+            <svg
+              fill="none"
+              height="10"
+              stroke="currentColor"
+              stroke-width="2"
+              viewbox="0 0 16 16"
+              width="10"
+            >
+              <path d="M3 8l4 4 6-6"></path>
+            </svg>
+            Save Entry
+          </button>
+        </div>
       </div>
-<div class="form-group">
-<label class="form-label">Master Password</label>
-<input class="form-input" id="create-pw" oninput="scorePassword(this.value,'create-strength-fill','create-strength-label',null)" placeholder="Choose a strong master password" type="password"/>
-<div class="strength-wrap">
-<div class="strength-bar-bg">
-<div class="strength-bar-fill" id="create-strength-fill"></div>
-</div>
-<div class="strength-label" id="create-strength-label"></div>
-</div>
-</div>
-<div class="form-group">
-<label class="form-label">Confirm Password</label>
-<input class="form-input" id="create-pw-confirm" placeholder="Repeat master password" type="password"/>
-</div>
-</div>
-<div class="modal-footer">
-<button class="btn-secondary" onclick="closeModal('modal-create')">Cancel</button>
-<button class="btn-primary" onclick="handleCreateVault()">Create Vault</button>
-</div>
-</div>
-</div>
-<!-- TOAST CONTAINER -->
-<div class="toast-container" id="toast-container"></div>
-<!-- ═══════════════════════════════════════════════
+    </div>
+    <!-- REVEAL PASSWORD MODAL -->
+    <div class="modal-overlay" id="modal-reveal">
+      <div class="modal" style="width: 420px">
+        <div class="modal-header">
+          <div class="modal-title" id="reveal-title">Credential</div>
+          <button class="modal-close" onclick="closeModal('modal-reveal')">
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Site</label>
+            <div
+              id="reveal-site-val"
+              style="
+                font-family: var(--font-mono);
+                font-size: 13px;
+                color: var(--text-prime);
+              "
+            ></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <div
+              id="reveal-user-val"
+              style="
+                font-family: var(--font-mono);
+                font-size: 13px;
+                color: var(--text-prime);
+              "
+            ></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="reveal-password" id="reveal-pw-val">Loading…</div>
+            <div class="copy-confirm" id="reveal-copy-confirm"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeModal('modal-reveal')">
+            Close
+          </button>
+          <button class="btn-primary" onclick="copyRevealedPassword()">
+            <svg
+              fill="none"
+              height="10"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewbox="0 0 16 16"
+              width="10"
+            >
+              <rect height="9" rx="1" width="9" x="5" y="5"></rect>
+              <path d="M3 11V3h8"></path>
+            </svg>
+            Copy Password
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- CREATE VAULT MODAL -->
+    <div class="modal-overlay" id="modal-create">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title">Create New Vault</div>
+          <button class="modal-close" onclick="closeModal('modal-create')">
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <div
+            style="
+              font-family: var(--font-mono);
+              font-size: 11px;
+              color: var(--text-muted);
+              margin-bottom: 20px;
+              line-height: 1.8;
+            "
+          >
+            Your master password is never stored. It derives a 256-bit AES key
+            via Argon2id. Choose a strong, memorable passphrase.
+          </div>
+          <div class="form-group">
+            <label class="form-label">Master Password</label>
+            <input
+              class="form-input"
+              id="create-pw"
+              oninput="
+                scorePassword(
+                  this.value,
+                  'create-strength-fill',
+                  'create-strength-label',
+                  null,
+                )
+              "
+              placeholder="Choose a strong master password"
+              type="password"
+            />
+            <div class="strength-wrap">
+              <div class="strength-bar-bg">
+                <div class="strength-bar-fill" id="create-strength-fill"></div>
+              </div>
+              <div class="strength-label" id="create-strength-label"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <input
+              class="form-input"
+              id="create-pw-confirm"
+              placeholder="Repeat master password"
+              type="password"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeModal('modal-create')">
+            Cancel
+          </button>
+          <button class="btn-primary" onclick="handleCreateVault()">
+            Create Vault
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+    <!-- ═══════════════════════════════════════════════
      JAVASCRIPT
 ═══════════════════════════════════════════════ -->
-<script src="./js/app.js"></script>
-</body>
+    <script src="./js/app.js"></script>
+  </body>
 </html>

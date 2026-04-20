@@ -23,6 +23,7 @@ router = APIRouter(prefix="/vault", tags=["vault"])
 SALT_KEY = "kdf_salt"
 VERIFIER_KEY = "master_verifier"
 VERIFIER_TEXT = b"cognivault-verifier"
+
 FAILED_ATTEMPTS = {}
 LOCKOUT_SECONDS = 10
 MAX_ATTEMPTS = 5
@@ -32,6 +33,7 @@ class UnlockRequest(BaseModel):
     password: str
 
 
+# ─── HELPERS ─────────────────────────────────────
 def _backup_dir() -> Path:
     downloads = Path.home() / "Downloads"
     if downloads.is_dir():
@@ -46,6 +48,48 @@ def _backup_dir() -> Path:
     return db_path.parent
 
 
+def _vault_exists(conn) -> bool:
+    row = conn.execute(
+        "SELECT value FROM vault_meta WHERE key = ?",
+        (SALT_KEY,),
+    ).fetchone()
+    return row is not None
+
+
+# ─── CREATE VAULT (NEW) ───────────────────────────
+@router.post("/create")
+def create_vault(req: UnlockRequest):
+    with get_connection() as conn:
+        if _vault_exists(conn):
+            raise HTTPException(status_code=409, detail="Vault already exists")
+
+        salt = os.urandom(16)
+        key = derive_key(req.password, salt)
+
+        conn.execute(
+            "INSERT INTO vault_meta(key, value) VALUES (?, ?)",
+            (SALT_KEY, salt.hex()),
+        )
+
+        ciphertext, nonce, tag = encrypt(VERIFIER_TEXT, key)
+        packed = f"{ciphertext.hex()}:{nonce.hex()}:{tag.hex()}"
+
+        conn.execute(
+            "INSERT INTO vault_meta(key, value) VALUES (?, ?)",
+            (VERIFIER_KEY, packed),
+        )
+
+        conn.execute(
+            "INSERT OR REPLACE INTO vault_meta(key, value) VALUES (?, ?)",
+            ("created_at", datetime.now(timezone.utc).isoformat()),
+        )
+
+        session.set_key(key)
+
+        return {"status": "created"}
+
+
+# ─── UNLOCK (FIXED) ──────────────────────────────
 @router.post("/unlock")
 def unlock(req: UnlockRequest):
     client_id = "local"
@@ -57,33 +101,16 @@ def unlock(req: UnlockRequest):
             raise HTTPException(status_code=429, detail="Too many attempts. Try later")
 
     with get_connection() as conn:
+        if not _vault_exists(conn):
+            raise HTTPException(
+                status_code=409,
+                detail="Vault not initialized. Create a vault first."
+            )
+
         salt_row = conn.execute(
             "SELECT value FROM vault_meta WHERE key = ?",
             (SALT_KEY,),
         ).fetchone()
-
-        if salt_row is None:
-            salt = os.urandom(16)
-            conn.execute(
-                "INSERT INTO vault_meta(key, value) VALUES (?, ?)",
-                (SALT_KEY, salt.hex()),
-            )
-            key = derive_key(req.password, salt)
-            ciphertext, nonce, tag = encrypt(VERIFIER_TEXT, key)
-            packed = f"{ciphertext.hex()}:{nonce.hex()}:{tag.hex()}"
-            conn.execute(
-                "INSERT INTO vault_meta(key, value) VALUES (?, ?)",
-                (VERIFIER_KEY, packed),
-            )
-            conn.execute(
-                "INSERT OR REPLACE INTO vault_meta(key, value) VALUES (?, ?)",
-                ("last_unlock_at", datetime.now(timezone.utc).isoformat()),
-            )
-            session.set_key(key)
-            return {"status": "unlocked", "first_run": True}
-
-        salt = bytes.fromhex(salt_row["value"])
-        key = derive_key(req.password, salt)
 
         verifier_row = conn.execute(
             "SELECT value FROM vault_meta WHERE key = ?",
@@ -93,16 +120,22 @@ def unlock(req: UnlockRequest):
         if verifier_row is None:
             raise HTTPException(status_code=500, detail="Vault verifier missing")
 
+        salt = bytes.fromhex(salt_row["value"])
+        key = derive_key(req.password, salt)
+
         try:
             ciphertext_hex, nonce_hex, tag_hex = verifier_row["value"].split(":")
+
             plaintext = decrypt(
                 bytes.fromhex(ciphertext_hex),
                 key,
                 bytes.fromhex(nonce_hex),
                 bytes.fromhex(tag_hex),
             )
+
             if plaintext != VERIFIER_TEXT:
                 raise HTTPException(status_code=401, detail="Invalid master password")
+
         except Exception:
             attempts, _ = FAILED_ATTEMPTS.get(client_id, (0, now))
             FAILED_ATTEMPTS[client_id] = (attempts + 1, now)
@@ -112,25 +145,32 @@ def unlock(req: UnlockRequest):
             "INSERT OR REPLACE INTO vault_meta(key, value) VALUES (?, ?)",
             ("last_unlock_at", datetime.now(timezone.utc).isoformat()),
         )
+
         session.set_key(key)
-        return {"status": "unlocked", "first_run": False}
+        return {"status": "unlocked"}
 
 
+# ─── LOCK ────────────────────────────────────────
 @router.post("/lock")
 def lock():
     session.clear_key()
     return {"status": "locked"}
 
 
+# ─── STATUS (UPDATED) ────────────────────────────
 @router.get("/status")
 def status():
+    with get_connection() as conn:
+        exists = _vault_exists(conn)
+
     try:
         session.get_key()
-        return {"locked": False}
+        return {"exists": exists, "locked": False}
     except HTTPException:
-        return {"locked": True}
+        return {"exists": exists, "locked": True}
 
 
+# ─── BACKUP ──────────────────────────────────────
 @router.post("/backup")
 def backup():
     key = session.get_key()
@@ -149,6 +189,7 @@ def backup():
             entry_count = src_conn.execute(
                 "SELECT COUNT(*) AS c FROM vault_entries"
             ).fetchone()["c"]
+
             metadata_count = src_conn.execute(
                 "SELECT COUNT(*) AS c FROM vault_meta"
             ).fetchone()["c"]
@@ -177,7 +218,6 @@ def backup():
 
         ciphertext, nonce, tag = encrypt(zip_buffer.getvalue(), key)
 
-        # File format: magic + nonce + tag + ciphertext
         out_path.write_bytes(b"CGBK1" + nonce + tag + ciphertext)
 
     return {

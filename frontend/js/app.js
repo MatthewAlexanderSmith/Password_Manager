@@ -142,8 +142,9 @@ async function handleUnlock() {
   const btn = getEl("btn-unlock");
 
   if (errEl) errEl.textContent = "";
+
   if (!pw) {
-    if (errEl) errEl.textContent = "⚠ Please enter your master password.";
+    if (errEl) errEl.textContent = "⚠ Enter master password.";
     return;
   }
 
@@ -151,15 +152,28 @@ async function handleUnlock() {
   btn.textContent = "Unlocking…";
 
   try {
+    const status = await api("GET", "/vault/status");
+
+    if (status.first_run) {
+      toast("No vault found. Create one first.", "error");
+      btn.disabled = false;
+      btn.textContent = "Unlock Vault";
+      return;
+    }
+
     await api("POST", "/vault/unlock", { password: pw });
+
     getEl("master-pw-input").value = "";
+
+    await playVaultTransition();
+
     showView("view-app");
     switchPanel("vault");
     await refreshVault({ clearSearch: true });
-    toast("Vault unlocked successfully", "success");
+
+    toast("Vault unlocked", "success");
   } catch (e) {
-    console.error("handleUnlock failed", e);
-    toast("Unlock failed: " + (e.message || e), "error");
+    if (errEl) errEl.textContent = "⚠ " + (e.message || "Unlock failed");
   } finally {
     btn.disabled = false;
     btn.textContent = "Unlock Vault";
@@ -206,19 +220,33 @@ async function handleCreateVault() {
     return;
   }
   try {
-    const result = await api("POST", "/vault/unlock", { password: pw });
+    const result = await api("POST", "/vault/create", { password: pw });
+
     closeModal("modal-create");
-    if (result.first_run) {
-      document.getElementById("master-pw-input").value = "";
-      showView("view-app");
-      await loadEntries();
-      toast("Vault created and unlocked successfully.", "success");
-    } else {
-      toast("A vault already exists. Please unlock it instead.", "info");
-    }
+
+    document.getElementById("master-pw-input").value = "";
+
+    await playVaultTransition();
+    showView("view-app");
+    await loadEntries();
+
+    toast("Vault created and unlocked successfully.", "success");
   } catch (e) {
     toast(e.message || "Failed to create vault", "error");
   }
+}
+
+function playVaultTransition() {
+  return new Promise((resolve) => {
+    const el = document.getElementById("vault-transition");
+
+    el.classList.add("active");
+
+    setTimeout(() => {
+      el.classList.remove("active");
+      resolve();
+    }, 550);
+  });
 }
 
 // ─── NAV ────────────────────────────────────────
@@ -724,22 +752,28 @@ function escHtml(s) {
 }
 
 // ─── INIT ────────────────────────────────────────
-document.addEventListener("DOMContentLoaded", () => {
-  // Check if backend is up and vault already unlocked
-  api("GET", "/vault/status")
-    .then(() => {
-      api("GET", "/entries")
-        .then(async (d) => {
-          allEntries = Array.isArray(d) ? d : d.entries || [];
-          renderEntries(allEntries);
-          updateBadge(allEntries.length);
-          showView("view-app");
-        })
-        .catch(() => {
-          /* vault locked, stay on lock screen */
-        });
-    })
-    .catch(() => {
-      // Backend not ready — show lock screen anyway
-    });
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const status = await api("GET", "/vault/status");
+
+    if (status.first_run) {
+      // Force user to create vault
+      getEl("btn-unlock").disabled = true;
+      showView("view-lock");
+      toast("Create a vault to begin", "info");
+      return;
+    }
+
+    if (!status.locked) {
+      const d = await api("GET", "/entries");
+      allEntries = Array.isArray(d) ? d : d.entries || [];
+      renderEntries(allEntries);
+      updateBadge(allEntries.length);
+      showView("view-app");
+    } else {
+      showView("view-lock");
+    }
+  } catch {
+    showView("view-lock");
+  }
 });
