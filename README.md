@@ -1,109 +1,214 @@
-# CogniVault — Backend
+# CogniVault — Local Password Manager
 
-FastAPI backend for the CogniVault local-only password manager.
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688.svg)
+![Security](https://img.shields.io/badge/Security-AES--GCM%20%2B%20Argon2id-green.svg)
+![Platform](https://img.shields.io/badge/Platform-Local%20Desktop-orange.svg)
+![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)
 
-## Responsibilities
+---
 
-- FastAPI REST API (vault, entries, stub endpoints)
-- SQLite schema and encrypted JSON storage
-- Module integration (crypto, AI, frontend bridge)
+## Overview
 
-## Setup
+CogniVault is a local-first password manager designed for secure offline storage of credentials. It avoids cloud dependency by keeping all sensitive data on the user’s machine, fully encrypted at rest.
 
-```bash
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
+The system is divided into modular components:
 
-## API Overview
+- Frontend (vanilla JavaScript, HTML, CSS)
+- Backend API (FastAPI with SQLite)
+- Cryptography layer (AES-256-GCM with Argon2id key derivation)
+- Optional AI module for experimental password analysis
 
-| Method | Endpoint             | Description                                      | Status         |
-| ------ | -------------------- | ------------------------------------------------ | -------------- |
-| POST   | /vault/unlock        | Derive key from master password, store in memory | ✅ Implemented |
-| POST   | /vault/lock          | Wipe in-memory key                               | ✅ Implemented |
-| GET    | /vault/status        | Return lock state                                | ✅ Implemented |
-| GET    | /entries             | List all entries (metadata only)                 | ✅ Implemented |
-| POST   | /entries             | Create entry with encrypted password             | ✅ Implemented |
-| GET    | /entries/{id}        | Retrieve entry with decrypted password           | ✅ Implemented |
-| PUT    | /entries/{id}        | Update entry                                     | ✅ Implemented |
-| DELETE | /entries/{id}        | Delete entry                                     | ✅ Implemented |
-| POST   | /ai/score-password   | Stub — to be implemented by Paul                 | 🔲 Stub only   |
-| POST   | /breach/check        | Stub — to be implemented by Paul                 | 🔲 Stub only   |
-| POST   | /export/quantum-safe | Stub — to be implemented by Omar                 | 🔲 Stub only   |
+---
+
+## Key Features
+
+- Master password vault unlock system
+- Secure key derivation using Argon2id
+- AES-256-GCM encryption for stored passwords
+- Local SQLite database storage
+- Create, read, update, and delete credentials
+- Search and filter functionality for entries
+- Password strength estimation
+- Breach checking support via API integration
+- Import and export of vault data
+- Encrypted backup and restore system
+- Optional AI-based password analysis (experimental)
+- Desktop-style interface using pywebview integration
+
+---
 
 ## Architecture
 
-```
-cognivault-backend/
-├── main.py                  # FastAPI app, CORS, DB init on startup
-├── session.py               # Thread-safe in-memory key store
-├── requirements.txt
-├── db/
-│   ├── database.py          # SQLite connection, WAL mode, context manager
-│   └── schema.sql           # vault_entries + vault_meta tables
-├── crypto/
-│   ├── aes_gcm.py           # AES-256-GCM encrypt/decrypt
-│   └── kdf.py               # Argon2id key derivation (64MB, 3 iter)
-├── routers/
-│   ├── vault.py             # /vault/unlock, /lock, /status
-│   ├── entries.py           # /entries CRUD (partial)
-│   ├── ai_stub.py           # /ai/score-password stub
-│   ├── breach_stub.py       # /breach/check stub
-│   └── export_stub.py       # /export/quantum-safe stub
-└── tests/
-    ├── test_crypto.py
-    └── test_entries.py
-```
+The application follows a simple layered architecture:
 
-## Security Design
+Frontend (User Interface)
+↓
+pywebview / HTTP bridge
+↓
+FastAPI backend service
+↓
+SQLite database
+↓
+Cryptography layer (Argon2id and AES-GCM)
 
-- **Master password** is never stored — only the Argon2id-derived key is held in memory
-- **Salt** is generated on first unlock, persisted in `vault_meta` as hex
-- **Verifier blob** (AES-GCM encrypted) stored in `vault_meta` to validate master password on subsequent unlocks without storing the password itself
-- **All passwords** are encrypted with AES-256-GCM before any disk write; ciphertext, nonce, and tag stored as separate BLOBs in SQLite
-- **CORS** locked to localhost only
-- **Session** is thread-safe (RLock); all protected routes return HTTP 401 when vault is locked
-- **KDF:** Argon2id — memory=64MB, iterations=3, parallelism=4, output=32 bytes
-- **Brute-force protection:** in-memory lockout after 5 failed unlock attempts (10 second cooldown); returns HTTP 429
-- **Input validation:** all entry fields have enforced length limits (title 1–100 chars, password 1–512 chars, etc.) — empty or oversized input returns HTTP 422
+---
 
-## Quick Test (Manual)
+## Project Structure
+
+feature/
+├── frontend/        User interface (HTML, CSS, JavaScript)
+├── backend-api/     FastAPI backend and route handlers
+├── cryptography/    Encryption, key derivation, and vault logic
+├── ai-algorithm/    Experimental AI-based password analysis
+
+---
+
+## Installation
+
+### 1. Clone the repository
 
 ```bash
-# 1. Start server
-uvicorn main:app --reload
-
-# 2. First unlock (initialises vault + salt)
-curl -X POST http://127.0.0.1:8000/vault/unlock -H "Content-Type: application/json" -d "{\"password\": \"master123\"}"
-# → {"status":"unlocked","first_run":true}
-
-# 3. Create an entry
-curl -X POST http://127.0.0.1:8000/entries -H "Content-Type: application/json" -d "{\"title\":\"Gmail\",\"username\":\"me\",\"password\":\"secret123\"}"
-# → {"id":1}
-
-# 4. Retrieve and decrypt
-curl http://127.0.0.1:8000/entries/1
-# → {"id":1,"title":"Gmail","username":"me","url":null,"password":"secret123","tags":""}
-
-# 5. Lock vault
-curl -X POST http://127.0.0.1:8000/vault/lock
-
-# 6. Confirm access is blocked
-curl http://127.0.0.1:8000/entries/1
-# → {"detail":"Vault is locked"}
+git clone https://github.com/MatthewAlexanderSmith/Password_Manager.git
+cd Password_Manager
 ```
 
-## Running Tests
+---
+
+### 2. Create a virtual environment
 
 ```bash
-python -m pytest
+python -m venv venv
+source venv/bin/activate      # macOS / Linux
+venv\Scripts\activate         # Windows
 ```
 
-8 tests total across two files:
+---
 
-- `tests/test_crypto.py` — AES-GCM encrypt/decrypt roundtrip, wrong-key rejection, nonce uniqueness
-- `tests/test_entries.py` — unlock flow, encrypted entry create/retrieve, list without password field, lock enforcement, wrong password rejection
+### 3. Install dependencies
 
-Tests use an isolated temporary SQLite database and never touch the real vault file.
+```bash
+pip install -r requirements.txt
+```
+
+If no requirements file is available:
+
+```bash
+pip install fastapi uvicorn sqlite3 cryptography pydantic
+```
+
+---
+
+### 4. Run the backend server
+
+```bash
+uvicorn backend-api.main:app --reload
+```
+
+---
+
+### 5. Launch the frontend
+
+If using pywebview:
+
+```bash
+python app.py
+```
+
+Alternatively, open:
+
+```
+frontend/index.html
+```
+
+---
+
+## Usage
+
+### Unlocking the vault
+
+- Enter the master password
+- The backend derives an encryption key using Argon2id
+- The session is unlocked locally in memory
+
+---
+
+### Managing entries
+
+- Add credentials including site, username, and password
+- Passwords are encrypted before storage
+- Data is stored securely in a local SQLite database
+
+---
+
+### Viewing and editing entries
+
+- Entries are decrypted on demand
+- Updates re-encrypt modified data before saving
+
+---
+
+## Security Model
+
+- Argon2id used for key derivation from the master password
+- AES-256-GCM used for authenticated encryption
+- Unique nonce per encrypted entry
+- Master key stored only in memory during session
+- No cloud storage or external synchronisation
+- Fully local execution environment
+
+---
+
+## AI Module (Experimental)
+
+The AI component provides experimental features such as:
+
+- Password strength classification
+- Detection of weak password patterns
+- Risk scoring heuristics
+
+This module is optional and not required for core functionality.
+
+---
+
+## Backend API
+
+| Method | Endpoint              | Description              |
+|--------|----------------------|--------------------------|
+| POST   | /vault/unlock        | Unlock the vault        |
+| POST   | /vault/lock          | Lock the vault          |
+| GET    | /vault/status        | Check vault status      |
+| GET    | /entries             | List all entries        |
+| POST   | /entries             | Create a new entry      |
+| PUT    | /entries/{id}        | Update an entry         |
+| DELETE | /entries/{id}        | Delete an entry         |
+
+---
+
+## Frontend Features
+
+- Tab-based navigation
+- Modal-based interaction system
+- Password generator
+- Password strength meter
+- Clipboard integration
+- Toast notifications
+- Offline-first design
+
+---
+
+## Dependencies
+
+- FastAPI
+- Uvicorn
+- SQLite
+- Cryptography
+- Pydantic
+- pywebview
+
+---
+
+## License
+
+This project is licensed under the MIT Licence.
+
