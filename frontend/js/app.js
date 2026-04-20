@@ -238,14 +238,22 @@ async function handleCreateVault() {
 
 function playVaultTransition() {
   return new Promise((resolve) => {
-    const el = document.getElementById("vault-transition");
+    const overlay = document.getElementById("vault-transition");
+    const door = overlay.querySelector(".vault-door");
 
-    el.classList.add("active");
+    document.body.style.overflow = "hidden";
+    overlay.classList.add("active");
 
     setTimeout(() => {
-      el.classList.remove("active");
+      door.classList.add("open");
+    }, 300);
+
+    setTimeout(() => {
+      overlay.classList.remove("active");
+      door.classList.remove("open");
+      document.body.style.overflow = "";
       resolve();
-    }, 550);
+    }, 900);
   });
 }
 

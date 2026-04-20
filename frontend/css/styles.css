@@ -1597,11 +1597,11 @@ body {
 #vault-transition {
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle at center, #0d0d18 0%, #05050a 100%);
+  background: radial-gradient(circle at center, #0b0b14 0%, #020204 100%);
   z-index: 9999;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.25s ease;
 }
 
 #vault-transition.active {
@@ -1609,29 +1609,84 @@ body {
   pointer-events: all;
 }
 
-.vault-core {
+/* VAULT DOOR */
+.vault-door {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 120px;
-  height: 120px;
-  transform: translate(-50%, -50%) scale(0.6);
+  width: 220px;
+  height: 220px;
+  transform: translate(-50%, -50%) scale(0.8);
   border-radius: 50%;
-  border: 2px solid rgba(201, 168, 76, 0.3);
+  background: radial-gradient(circle, #141422, #0a0a12);
   box-shadow:
-    0 0 20px rgba(201, 168, 76, 0.2),
-    inset 0 0 20px rgba(201, 168, 76, 0.15);
-  animation: vaultPulse 0.6s ease forwards;
+    0 0 40px rgba(201, 168, 76, 0.15),
+    inset 0 0 30px rgba(201, 168, 76, 0.1);
+  overflow: hidden;
 }
 
-@keyframes vaultPulse {
+/* OUTER RING */
+.vault-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(201, 168, 76, 0.4);
+  animation: ringRotate 0.6s ease forwards;
+}
+
+/* LOCK CORE */
+.vault-lock {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  transform: translate(-50%, -50%) rotate(0deg);
+  border-radius: 50%;
+  border: 2px solid #c9a84c;
+  box-shadow:
+    0 0 15px rgba(201, 168, 76, 0.4),
+    inset 0 0 10px rgba(201, 168, 76, 0.2);
+  animation: lockSpin 0.5s ease forwards;
+}
+
+/* ANIMATIONS */
+
+@keyframes lockSpin {
   0% {
-    transform: translate(-50%, -50%) scale(0.5);
-    opacity: 0.2;
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
   50% {
-    transform: translate(-50%, -50%) scale(1.2);
+    transform: translate(-50%, -50%) rotate(180deg) scale(1.1);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg) scale(0.9);
+  }
+}
+
+@keyframes ringRotate {
+  0% {
+    transform: rotate(0deg);
+    opacity: 0.3;
+  }
+  100% {
+    transform: rotate(120deg);
     opacity: 1;
+  }
+}
+
+/* FINAL OPEN (EXPANSION) */
+.vault-door.open {
+  animation: vaultOpen 0.6s ease forwards;
+}
+
+@keyframes vaultOpen {
+  0% {
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 1;
+  }
+  60% {
+    transform: translate(-50%, -50%) scale(1.3);
   }
   100% {
     transform: translate(-50%, -50%) scale(8);
