@@ -1,14 +1,14 @@
-import os
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
 import tempfile
 
-# Must happen before ANY other import
 _temp_db = tempfile.NamedTemporaryFile(delete=False, suffix=".db")
 _temp_db.close()
 os.environ["COGNIVAULT_DB"] = _temp_db.name
 
 from db.database import initialize_database  # noqa: E402
-initialize_database()  # create tables before anything else touches the DB
-
+initialize_database()
 from main import app  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 import pytest  # noqa: E402
@@ -32,11 +32,9 @@ def reset_state():
 
 
 def unlock():
-    return client.post(
-        "/vault/unlock",
-        json={"password": MASTER_PASSWORD},
-    )
-
+    # Create the vault (first run), ignore 409 if it already exists
+    client.post("/vault/create", json={"password": MASTER_PASSWORD})
+    return client.post("/vault/unlock", json={"password": MASTER_PASSWORD})
 
 def test_unlock():
     res = unlock()
@@ -80,7 +78,7 @@ def test_lock_blocks_access():
 
 
 def test_wrong_password_rejected():
-    unlock()  # establishes salt + verifier
+    client.post("/vault/create", json={"password": MASTER_PASSWORD})
     client.post("/vault/lock")
 
     res = client.post(
